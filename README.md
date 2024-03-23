@@ -1,4 +1,4 @@
-<h3>Создание репозитория</h3>	ixaker/appQpartWSS
+<h3>Создание репозитория</h3>	ixaker/monitoringServer
 
     rm -rf .git
 
@@ -6,7 +6,7 @@
     git add .
     git commit -m "first commit"
     git branch -M main
-    git remote add origin git@github.com:ixaker/appQpartWSS.git
+    git remote add origin git@github.com:ixaker/monitoringServer.git
     git push -u origin main
 
  <hr>
@@ -15,6 +15,6 @@
 
     mkdir -p /root/dev/wss
     cd /root/dev/wss
-    git clone https://github.com/ixaker/appQpartWSS.git .
+    git clone https://github.com/ixaker/monitoringServer.git .
     npm install
     npm run dev

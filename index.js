@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+
 const http = require('http');
 const https = require('https');
 const url = require('url');
@@ -14,6 +15,10 @@ require('./server/socketServer')(server);
 
 
 const dev = process.env.NODE_ENV !== 'production';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const envFilePath = path.join(__dirname, '.env');
 
 const nextApp = next({ dev });
@@ -28,7 +33,7 @@ if (!fs.existsSync(envFilePath)) {
     fs.writeFileSync(envFilePath, defaultEnvData);
 }
 
-const domian = process.env.domian;
+
 
 const ssl_key = path.join(domian, 'privkey.pem');
 const ssl_cert = path.join(domian, 'fullchain.pem');

@@ -26,8 +26,8 @@ if (!fs.existsSync(envFilePath)) {
 
 const domian = process.env.domian;
 
-const ssl_key = path.join("/etc/letsencrypt/live", domian, 'privkey.pem');
-const ssl_cert = path.join("/etc/letsencrypt/live", domian, 'fullchain.pem');
+const ssl_key = path.join(domian, 'privkey.pem');
+const ssl_cert = path.join(domian, 'fullchain.pem');
 
 const httpApp = express();
 const app = express();

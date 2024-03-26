@@ -1,5 +1,5 @@
 import http from 'http';
-import createWebSocketServer from './ws';
+import createWebSocketServer from './api/ws.js';
 
 export default function startServer() {
   const server = http.createServer();

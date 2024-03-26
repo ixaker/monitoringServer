@@ -1,20 +1,32 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+import http from 'http';
+import https from 'https';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import path from 'path';
 
-const http = require('http');
-const https = require('https');
-const url = require('url');
-const fs = require('fs');
-const express = require('express');
-const path = require('path');
-const proxy = require('./proxy');
-const next = require('next');
+import fs from 'fs';
+import express from 'express';
+import proxy from './src/server/proxy.js';
+import next from 'next';
 
 // Запуск WebSocket сервера
-require('./server/socketServer')(server);
+import startServer from './src/server/socketServer.js';
 
+startServer();
 
 const dev = process.env.NODE_ENV !== 'production';
-const envFilePath = path.join(__dirname, '.env');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const domian = process.env.domian;
+
+const envFilePath = join(__dirname, 'env');
+console.log(import.meta.url)
+console.log('')
+
+console.log(envFilePath)
 
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
@@ -27,8 +39,6 @@ if (!fs.existsSync(envFilePath)) {
   
     fs.writeFileSync(envFilePath, defaultEnvData);
 }
-
-const domian = process.env.domian;
 
 const ssl_key = path.join(domian, 'privkey.pem');
 const ssl_cert = path.join(domian, 'fullchain.pem');

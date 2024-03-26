@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
+import { createServer } from "http";
 
-export default async function handler(req, res) {
+export async function handler(req, res, socket) {
   if (req.method === "POST") {
     // Отримано POST запит, обробка даних
     const data = req.body;
@@ -19,27 +20,36 @@ export default async function handler(req, res) {
   }
 }
 
-let io;
+export default function createWebSocketServer() {
+  let io;
 
-// Створюємо веб-сокет сервер
-if (!io) {
-  const httpServer = require("http").createServer(handler);
-  io = new Server(httpServer, {
-    /* options */
-  });
+  // Створюємо веб-сокет сервер
+  if (!io) {
+    
 
-  // Обробник підключення нового клієнта
-  io.on("connection", (socket) => {
-    console.log("A client connected");
-
-    // Обробник відключення клієнта
-    socket.on("disconnect", () => {
-      console.log("A client disconnected");
+    const httpServer = createServer();
+    io = new Server(httpServer, {
+      /* options */
     });
-  });
 
-  // Запускаємо веб-сокет сервер
-  httpServer.listen(3001, () => {
-    console.log("WebSocket server is running on port 3001");
-  });
+    // Обробник підключення нового клієнта
+    io.on("connection", (socket) => {
+      console.log("A client connected");
+
+      // Обробник відключення клієнта
+      socket.on("disconnect", () => {
+        console.log("A client disconnected");
+      });
+
+      // Передаємо socket у функцію обробника
+      httpServer.on('request', (req, res) => {
+        handler(req, res, socket);
+      });
+    });
+
+    // Запускаємо веб-сокет сервер
+    httpServer.listen(3001, () => {
+      console.log("WebSocket server is running on port 3001");
+    });
+  }
 }

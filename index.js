@@ -6,9 +6,14 @@ const url = require('url');
 const fs = require('fs');
 const express = require('express');
 const path = require('path');
-const proxy = require('./proxy');
+// const proxy = require('./proxy');
+const next = require('next');
 
+const dev = process.env.NODE_ENV !== 'production';
 const envFilePath = path.join(__dirname, '.env');
+
+const nextApp = next({ dev });
+const handle = nextApp.getRequestHandler();
 
 if (!fs.existsSync(envFilePath)) {
     const defaultEnvData = `secret=my-secret-key
@@ -33,21 +38,39 @@ console.log(ssl_cert)
 const httpServer = http.createServer(httpApp);
 const httpsServer = https.createServer({ key: fs.readFileSync(ssl_key), cert: fs.readFileSync(ssl_cert)}, app);
 
+nextApp.prepare().then(() => {
+    httpApp.get('*', (req, res) => {
+        return handle(req, res);
+    });
 
-httpApp.use((req, res, next) => {
-    // Перенаправлення на HTTPS
-    console.log('redirecting to HTTPS');
-    res.redirect('https://' + req.headers.host + req.url);
+    app.get('*', (req, res) => {
+        return handle(req, res);
+    });
+
+    httpApp.use((req, res, next) => {
+        console.log('redirecting to HTTPS');
+        res.redirect('https://' + req.headers.host + req.url);
+    });
+    
+    httpServer.listen(80, () => {
+        console.log('HTTP server is running on port 80');
+    });
+
+    httpsServer.listen(443, () => {
+        console.log('Secure server is running on port 443');
+    });
 });
+
+
 
 // Підключення middleware проксі
-proxy(app);
+// proxy(app);
 
-httpServer.listen(80, () => {
-    console.log('HTTP server is running on port 80');
-});
+// httpServer.listen(80, () => {
+//     console.log('HTTP server is running on port 80');
+// });
 
-httpsServer.listen(443, () => {
-    console.log('Secure server is running on port 443');
-});
+// httpsServer.listen(443, () => {
+//     console.log('Secure server is running on port 443');
+// });
 

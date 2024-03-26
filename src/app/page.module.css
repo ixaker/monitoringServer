@@ -108,6 +108,30 @@
 .logo {
   position: relative;
 }
+
+.deviceItem {
+  border: 1px solid #ce1010;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: white;
+}
+
+.discsList {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.discItem {
+  margin-top: 5px;
+  padding: 5px;
+  background-color: #8a0909;
+  border-radius: 3px;
+  color: green;
+}
+
+
+
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
@@ -228,3 +252,5 @@
     transform: rotate(0deg);
   }
 }
+
+

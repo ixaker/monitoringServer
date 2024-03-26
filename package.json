@@ -10,16 +10,18 @@
     "server": "nodemon --watch index.js"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.2.2",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "http-proxy-middleware": "^2.0.6",
     "next": "14.1.4",
-    "nodemon": "^3.1.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-redux": "^9.1.0"
   },
   "devDependencies": {
     "eslint": "^8",
-    "eslint-config-next": "14.1.4"
+    "eslint-config-next": "14.1.4",
+    "nodemon": "^3.1.0"
   }
 }

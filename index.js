@@ -16,9 +16,6 @@ require('./server/socketServer')(server);
 
 const dev = process.env.NODE_ENV !== 'production';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 const envFilePath = path.join(__dirname, '.env');
 
 const nextApp = next({ dev });

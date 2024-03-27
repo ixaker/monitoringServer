@@ -1,9 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-
-import { Injectable } from '@nestjs/common';
-import { UseGateway } from '@nestjs/websockets';
-import { WebsocketGateway } from './websocket.gateway';
+import { Injectable} from '@nestjs/common';
+import { UseGateway } from '@nestjs/websockets'
+import { WebsocketGateway } from './websocket.gateway'; 
 
 @Controller()
 export class AppController {
@@ -16,8 +15,7 @@ export class AppController {
 }
 
 @Injectable()
-@UseGateway(WebsocketGateway)
-
+@UseGateway(WebsocketGateway) 
 export class MyService {
   
 }

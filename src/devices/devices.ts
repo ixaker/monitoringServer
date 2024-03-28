@@ -1,14 +1,17 @@
+import { log } from 'console';
 import { promises as fs } from 'fs';
 
 interface CPUInfo {
     model: string;
     load: number;
+    history: number[];
 }
 
 interface RAMInfo {
     total: number;
     used: number;
     procent: number;
+    history: number[];
 }
 
 interface DiskInfo {
@@ -30,6 +33,8 @@ interface Device {
     RAM: RAMInfo;
     disk: DiskInfo[];
     id: string;
+    online: boolean;
+    timeLastInfo: Date;
 }
 
 export class Devices {
@@ -44,6 +49,11 @@ export class Devices {
         try {
             const data = await fs.readFile(this.filename, 'utf8');
             this.list = JSON.parse(data);
+
+            this.list.forEach((device) => {
+                device.timeLastInfo = new Date(device.timeLastInfo);
+            });
+
         } catch (err) {
             if (err.code === 'ENOENT') {
                 console.log('Файл devices.json не найден. Будет создан новый при первом сохранении.');
@@ -52,6 +62,36 @@ export class Devices {
                 console.error('Ошибка при чтении файла:', err);
             }
         }
+
+        setInterval(() => {
+            this.checkIsOffline();
+          }, 15000); // 10000 миллисекунд = 10 секунд
+    }
+    
+    private checkIsOffline() {
+        console.log('Эта функция вызывается каждые 15 секунд');
+        
+        try {
+            const currTime : Date = new Date(); 
+        
+            this.list.forEach((device) => {
+                try {
+                    const lastTime = device.timeLastInfo || new Date(0);                  
+                    const diffTime = (currTime.getTime() - lastTime.getTime()) / 1000;
+                    
+                    if (diffTime > 25) {
+                        device.online = false;
+                    }
+
+                    console.log(device.name, device.online ,'diffTime', diffTime, lastTime);
+                } catch (error) {
+                    device.online = false;
+                }
+                
+            });
+        } catch (error) {
+            console.error('checkIsOffline', error);
+        }
     }
 
     getList(): Device[] {
@@ -59,14 +99,36 @@ export class Devices {
     }
 
     async updateInfo(payload: Device): Promise<void> {
-        const index = this.list.findIndex((item) => item.id === payload.id);
-        if (index >= 0) {
-            this.list[index] = payload;
-        } else {
-            this.list.push(payload);
-        }
+        payload.timeLastInfo = new Date();
+        payload.online = true;
+        
+        try {
+            const index = this.list.findIndex((item) => item.id === payload.id);
+            if (index >= 0) {
+                payload.CPU.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...this.list[index].CPU.history||[]].slice(-15);
+                payload.CPU.history.push(payload.CPU.load);
 
-        await this.saveToFile();
+                payload.RAM.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...this.list[index].RAM.history||[]].slice(-15);
+                payload.RAM.history.push(payload.RAM.procent);
+
+                this.list[index] = payload;
+
+                console.log(this.list[index].name, payload.CPU.load, 'CPU history : ', this.list[index].CPU.history);
+                
+            } else {
+                payload.CPU.history = [];
+                payload.CPU.history.push(payload.CPU.load);
+
+                payload.RAM.history = [];
+                payload.RAM.history.push(payload.RAM.procent);
+
+                this.list.push(payload);
+            }
+
+            await this.saveToFile();
+        } catch (error) {
+            console.error('ERROR - updateInfo', error)
+        }
     }
 
     private async saveToFile(): Promise<void> {

@@ -1,4 +1,4 @@
-import { OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer  } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { Devices } from './../devices/devices';
 import { log } from 'console';
@@ -9,7 +9,7 @@ import { log } from 'console';
   },
 })
 
-export class SocketService implements OnGatewayConnection{
+export class SocketService implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
 
@@ -42,6 +42,9 @@ export class SocketService implements OnGatewayConnection{
     if(topic === 'info'){
       client.devID = payload.id;
       // save info to array
+      payload.timeLastInfo = new Date();
+      payload.online = true;
+
       this.dev.updateInfo(payload);
 
       // send info to web client
@@ -56,7 +59,6 @@ export class SocketService implements OnGatewayConnection{
           
           socket.send(JSON.stringify({topic: 'command', payload: payload.command}));
         }
-        
       })
 
     }else if (topic === 'result') {

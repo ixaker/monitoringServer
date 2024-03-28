@@ -4,25 +4,25 @@
     "admin": true,
     "errors": [],
     "name": "RootServer1",
-    "uptime": "0 дней 00:02:06",
+    "uptime": "0 дней 02:54:50",
     "network": [
       "26.209.194.119",
       "192.168.88.94"
     ],
     "CPU": {
       "model": "Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz",
-      "load": 1
+      "load": 0
     },
     "RAM": {
       "total": 15.85,
-      "used": 1.49,
-      "procent": 9.38
+      "used": 2.04,
+      "procent": 12.85
     },
     "disk": [
       {
         "mounted": "C:",
         "total": 28.55,
-        "used": 15.75,
+        "used": 15.76,
         "available": 12.8,
         "procent": 55,
         "crypt": true,
@@ -74,7 +74,7 @@
     "admin": true,
     "errors": [],
     "name": "inv1767",
-    "uptime": "0 дней 00:50:14",
+    "uptime": "0 дней 02:33:16",
     "network": [
       "192.168.88.21",
       "10.8.0.14",
@@ -86,15 +86,15 @@
     },
     "RAM": {
       "total": 5.91,
-      "used": 3.57,
-      "procent": 60.38
+      "used": 3.79,
+      "procent": 64.17
     },
     "disk": [
       {
         "mounted": "C:",
         "total": 225.69,
-        "used": 75.5,
-        "available": 150.2,
+        "used": 75.55,
+        "available": 150.14,
         "procent": 33,
         "crypt": false,
         "locked": false
@@ -110,5 +110,67 @@
       }
     ],
     "id": "9d09ea0961edead16015af256ed86cdc47dcc5e92be809af6ec5195cb32b216c"
+  },
+  {
+    "role": "comp",
+    "admin": true,
+    "errors": [],
+    "name": "inv1731",
+    "uptime": "0 дней 00:00:18",
+    "network": [
+      "192.168.88.34"
+    ],
+    "CPU": {
+      "model": "Intel(R) Core(TM) i3-3220T CPU @ 2.80GHz",
+      "load": 75
+    },
+    "RAM": {
+      "total": 7.85,
+      "used": 1.59,
+      "procent": 20.29
+    },
+    "disk": [
+      {
+        "mounted": "C:",
+        "total": 953.27,
+        "used": 27.66,
+        "available": 925.62,
+        "procent": 3,
+        "crypt": true,
+        "locked": false
+      }
+    ],
+    "id": "594cbac8b932caa28ac6dee8bae92354ce2e1d3561c49a3c8ae25498892f4256"
+  },
+  {
+    "role": "comp",
+    "admin": true,
+    "errors": [],
+    "name": "inv1731",
+    "uptime": "0 дней 00:01:56",
+    "network": [
+      "192.168.88.34"
+    ],
+    "CPU": {
+      "model": "Intel(R) Core(TM) i3-3220T CPU @ 2.80GHz",
+      "load": 14
+    },
+    "RAM": {
+      "total": 7.85,
+      "used": 1.57,
+      "procent": 20.03
+    },
+    "disk": [
+      {
+        "mounted": "C:",
+        "total": 953,
+        "used": 23.94,
+        "available": 929.07,
+        "procent": 3,
+        "crypt": false,
+        "locked": false
+      }
+    ],
+    "id": "858dcad8b6af7970e66d72b3eec8b2d34d10a98dfc4a0cc645d20f276861104d"
   }
 ]

@@ -71,3 +71,32 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
   Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+
+<h3>Создание службы для приложения:</h3>
+
+    sudo nano /etc/systemd/system/monitoring.service
+
+    [Unit]
+    Description=monitoring
+    After=network.target
+    
+    [Service]
+    Type=simple
+    WorkingDirectory=/root/dev/monitoring
+    ExecStart=/usr/bin/node nest start
+    Restart=always
+    RestartSec=10
+    
+    [Install]
+    WantedBy=multi-user.target
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable monitoring
+    sudo systemctl start monitoring
+    sudo systemctl disable monitoring
+    sudo systemctl stop monitoring
+    sudo systemctl restart monitoring
+    
+ <hr>

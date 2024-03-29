@@ -40,8 +40,10 @@ interface Device {
 export class Devices {
     private list: Device[] = [];
     private filename: string = 'devices.json'; // Путь к файлу для сохранения данных
+    private callback: (device: Object) => void; // Объявляем тип callback функции
 
-    constructor() {
+    constructor(callback: (device: Device) => void) {
+        this.callback = callback;
         this.init();
     }
 
@@ -80,14 +82,16 @@ export class Devices {
                     const diffTime = (currTime.getTime() - lastTime.getTime()) / 1000;
                     
                     if (diffTime > 25) {
-                        device.online = false;
+                        //device.online = false;
+                        this.setProperty(device, 'online', false);
                     }
 
                     console.log(device.name, device.online ,'diffTime', diffTime, lastTime);
                 } catch (error) {
-                    device.online = false;
+                    this.setProperty(device, 'online', false);
                 }
                 
+                // this.callback(sampleDevice);
             });
         } catch (error) {
             console.error('checkIsOffline', error);
@@ -105,26 +109,25 @@ export class Devices {
         try {
             const index = this.list.findIndex((item) => item.id === payload.id);
             if (index >= 0) {
-                payload.CPU.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...this.list[index].CPU.history||[]].slice(-15);
+                const device = this.list[index];
+
+                payload.CPU.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...device.CPU.history||[]].slice(-15);
                 payload.CPU.history.push(payload.CPU.load);
 
-                payload.RAM.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...this.list[index].RAM.history||[]].slice(-15);
+                payload.RAM.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...device.RAM.history||[]].slice(-15);
                 payload.RAM.history.push(payload.RAM.procent);
 
                 this.list[index] = payload;
-
-                console.log(this.list[index].name, payload.CPU.load, 'CPU history : ', this.list[index].CPU.history);
-                
+                this.callback({topic: 'info', payload: payload});
             } else {
-                payload.CPU.history = [];
-                payload.CPU.history.push(payload.CPU.load);
-
-                payload.RAM.history = [];
-                payload.RAM.history.push(payload.RAM.procent);
+                payload.CPU.history = [payload.CPU.load];
+                payload.RAM.history = [payload.RAM.procent];
 
                 this.list.push(payload);
+                //this.callback({topic: 'info', payload: payload});
             }
 
+            //this.callback({topic: 'info', payload: payload});
             await this.saveToFile();
         } catch (error) {
             console.error('ERROR - updateInfo', error)
@@ -139,6 +142,28 @@ export class Devices {
         }
     }
 
+    private setProperty(device:Device, property:string, newValue:any){
+        if(device[property] !== newValue){
+            device[property] = newValue;
+            this.callback({topic: 'info', payload: device});
+        }
+    }
+
+    setOffline(id:string){
+        try {
+            const index = this.list.findIndex((item) => item.id === id);
+
+            if (index >= 0) {
+                const device = this.list[index];
+
+                device.online = false;
+                this.callback({topic: 'info', payload: device});
+            }
+
+        } catch (error) {
+            console.error('ERROR - setOffline', error)
+        }
+    }
 }
 
 

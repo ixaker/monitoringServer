@@ -1,20 +1,13 @@
 import { OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer  } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { Devices } from './../devices/devices';
-import { log } from 'console';
 
-@WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
-})
+@WebSocketGateway({ cors: { origin: '*' }})
 
 export class SocketService implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
-
-  // Создание экземпляра класса Devices
-  dev = new Devices();
+  dev = new Devices(this.sendInfoForWebClient.bind(this));
 
   handleConnection(client: any, ...args: any[]) {
     console.log('Client connected', client.id, client.handshake.headers.type || 'no type');
@@ -23,13 +16,9 @@ export class SocketService implements OnGatewayConnection {
       const listDevices = this.dev.getList();
 
       listDevices.forEach((device) => {
-        client.send(JSON.stringify({topic:'info', payload:device}));
+        client.emit('webclient', JSON.stringify({topic:'info', payload:device}));
       });
     }
-  }
-
-  handleDisconnect(client: any) {
-    console.log('Client disconnected', client.id);
   }
 
   @SubscribeMessage('message')
@@ -41,14 +30,7 @@ export class SocketService implements OnGatewayConnection {
 
     if(topic === 'info'){
       client.devID = payload.id;
-      // save info to array
-      payload.timeLastInfo = new Date();
-      payload.online = true;
-
       this.dev.updateInfo(payload);
-
-      // send info to web client
-      this.sendInfoForWebClient(message);
 
     }else if (topic === 'command') {
       this.server.sockets.sockets.forEach((socket, id) => {
@@ -56,13 +38,11 @@ export class SocketService implements OnGatewayConnection {
 
         if (devID === payload.id) {
           console.log('Send command to client', payload);
-          
           socket.send(JSON.stringify({topic: 'command', payload: payload.command}));
         }
       })
 
     }else if (topic === 'result') {
-      // send info to web client
       this.sendInfoForWebClient(message);
       
     }else{
@@ -71,11 +51,20 @@ export class SocketService implements OnGatewayConnection {
   }
 
   sendInfoForWebClient(payload) {
-    this.server.sockets.sockets.forEach((client, id) => {
-      if (client.handshake.headers.type === 'webclient') {
-        client.send(JSON.stringify(payload));
-      }
-    })
+    const message = JSON.stringify(payload)
+    console.log('Send to WebClient', message.slice(0, 120) + '...');
+    
+    this.server.emit('webclient', message);
+  }
+
+  handleDisconnect(client: any) {
+    const devID = client.devID || '';
+
+    if (devID !== '') {
+      this.dev.setOffline(devID);
+    }
+
+    console.log('Client disconnected', client.id, client.handshake.headers, devID);
   }
 }
 

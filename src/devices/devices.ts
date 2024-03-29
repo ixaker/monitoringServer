@@ -41,7 +41,7 @@ export class Devices {
     private list: Device[] = [];
     private filename: string = 'devices.json'; // Путь к файлу для сохранения данных
     private callback: (device: Object) => void; // Объявляем тип callback функции
-
+    
     constructor(callback: (device: Device) => void) {
         this.callback = callback;
         this.init();

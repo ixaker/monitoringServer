@@ -24,7 +24,7 @@ export class SocketService implements OnGatewayConnection {
   handleMessageCommand(client: any, payload: any): void {
     console.log('SubscribeMessage - command', payload);
 
-    this.server.emit(payload.id, {topic: 'command', payload: payload.command});
+    this.server.emit(payload.id, payload);
   }
 
   // from Devices 
@@ -39,12 +39,6 @@ export class SocketService implements OnGatewayConnection {
       console.log('SubscribeMessage - result', data);
 
       this.server.emit('webclient', data);
-  }
-
-  // ???
-  @SubscribeMessage('message')
-  handleMessage(client: any, data: any): void {
-    console.log('Message received:',  data);
   }
 
 
@@ -65,7 +59,7 @@ export class SocketService implements OnGatewayConnection {
       this.dev.setOffline(devID);
     }
 
-    console.log('Client disconnected', client.id, client.handshake.headers, devID);
+    console.log('Client disconnected', client.id, devID);
   }
 
   sendInfoForWebClient(payload) {

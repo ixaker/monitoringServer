@@ -25,6 +25,7 @@
     "@nestjs/platform-express": "^10.3.2",
     "@nestjs/platform-socket.io": "^10.3.6",
     "@nestjs/websockets": "^10.3.6",
+    "node-telegram-bot-api": "^0.65.1",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
     "ws": "^8.16.0"

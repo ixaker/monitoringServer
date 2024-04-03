@@ -82,7 +82,6 @@ export class Devices {
                     const diffTime = (currTime.getTime() - lastTime.getTime()) / 1000;
                     
                     if (diffTime > 25) {
-                        //device.online = false;
                         this.setProperty(device, 'online', false);
                     }
 
@@ -91,7 +90,6 @@ export class Devices {
                     this.setProperty(device, 'online', false);
                 }
                 
-                // this.callback(sampleDevice);
             });
         } catch (error) {
             console.error('checkIsOffline', error);
@@ -124,10 +122,8 @@ export class Devices {
                 payload.RAM.history = [payload.RAM.procent];
 
                 this.list.push(payload);
-                //this.callback({topic: 'info', payload: payload});
             }
 
-            //this.callback({topic: 'info', payload: payload});
             await this.saveToFile();
         } catch (error) {
             console.error('ERROR - updateInfo', error)

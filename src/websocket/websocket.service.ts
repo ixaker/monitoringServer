@@ -9,52 +9,53 @@ export class SocketService implements OnGatewayConnection {
   server: Server;
   dev = new Devices(this.sendInfoForWebClient.bind(this));
 
+
+  // from Devices
+  @SubscribeMessage('info')
+  handleMessageInfo(client: any, payload: any): void {
+    console.log('SubscribeMessage - info', payload.name);
+    
+    client.devID = payload.id;
+    this.dev.updateInfo(payload);
+  }
+
+  // from WebClients
+  @SubscribeMessage('command')
+  handleMessageCommand(client: any, payload: any): void {
+    console.log('SubscribeMessage - command', payload);
+
+    this.server.emit(payload.id, {topic: 'command', payload: payload.command});
+  }
+
+  // from Devices 
+  @SubscribeMessage('telegram')
+  handleMessageTelegram(client: any, data: any): void {
+    console.log('SubscribeMessage - telegram', data);
+  }
+
+  // from Devices 
+  @SubscribeMessage('result')
+  handleMessageResult(client: any, data: any): void {
+      console.log('SubscribeMessage - result', data);
+
+      this.server.emit('webclient', data);
+  }
+
+  // ???
+  @SubscribeMessage('message')
+  handleMessage(client: any, data: any): void {
+    console.log('Message received:',  data);
+  }
+
+
   handleConnection(client: any, ...args: any[]) {
     console.log('Client connected', client.id, client.handshake.headers.type || 'no type');
 
     if (client.handshake.headers.type === 'webclient') {
-      const listDevices = this.dev.getList();
-
-      listDevices.forEach((device) => {
-        client.emit('webclient', JSON.stringify({topic:'info', payload:device}));
+      this.dev.getList().forEach((device) => {
+        client.emit('webclient', {topic:'info', payload:device});
       });
     }
-  }
-
-  @SubscribeMessage('message')
-  handleMessage(client: any, data: any): void {
-    const message = JSON.parse(data);
-    const { topic, payload } = message;
-
-    console.log('Message received:', topic, data.slice(0, 120) + '...');
-
-    if(topic === 'info'){
-      client.devID = payload.id;
-      this.dev.updateInfo(payload);
-
-    }else if (topic === 'command') {
-      this.server.sockets.sockets.forEach((socket, id) => {
-        const devID = socket['devID'] || '';
-
-        if (devID === payload.id) {
-          console.log('Send command to client', payload);
-          socket.send(JSON.stringify({topic: 'command', payload: payload.command}));
-        }
-      })
-
-    }else if (topic === 'result') {
-      this.sendInfoForWebClient(message);
-      
-    }else{
-      console.error('unknown topic', topic); 
-    }
-  }
-
-  sendInfoForWebClient(payload) {
-    const message = JSON.stringify(payload)
-    console.log('Send to WebClient', message.slice(0, 120) + '...');
-    
-    this.server.emit('webclient', message);
   }
 
   handleDisconnect(client: any) {
@@ -65,6 +66,12 @@ export class SocketService implements OnGatewayConnection {
     }
 
     console.log('Client disconnected', client.id, client.handshake.headers, devID);
+  }
+
+  sendInfoForWebClient(payload) {
+    console.log('Send to WebClient'); 
+
+    this.server.emit('webclient', payload);
   }
 }
 

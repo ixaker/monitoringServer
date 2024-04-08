@@ -2,6 +2,10 @@ import { OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServe
 import { Server } from 'socket.io';
 import { Devices } from './../devices/devices';
 import * as TelegramBot from 'node-telegram-bot-api';
+import { isValidToken } from 'src/tokens/isTokenValid';
+import { AuthService } from './../auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
+
 
 @WebSocketGateway({ cors: { origin: '*' }})
 
@@ -12,11 +16,14 @@ export class SocketService implements OnGatewayConnection {
   bot = new TelegramBot('5732114057:AAHK-S0mlws8G4-d9AOwJ0rlqX6ikeI_nSY', { polling: true });
   chatId = '672754822';
 
+  constructor(
+    private readonly authService: AuthService,
+  ) {}
+
   // from Devices
   @SubscribeMessage('info')
   handleMessageInfo(client: any, payload: any): void {
     console.log('SubscribeMessage - info', payload.name);
-    
     client.devID = payload.id;
     this.dev.updateInfo(payload);
   }
@@ -63,9 +70,19 @@ export class SocketService implements OnGatewayConnection {
     console.log('Client connected', client.id, client.handshake.headers.type || 'no type');
 
     if (client.handshake.headers.type === 'webclient') {
-      this.dev.getList().forEach((device) => {
-        client.emit('webclient', {topic:'info', payload:device});
-      });
+        const clientToken = client.handshake.authorization;
+        try {
+          const decodedToken = this.authService.verifyToken(clientToken);
+          console.log('client token is valid')
+          this.dev.getList().forEach((device) => {
+              console.log('send handshake data')
+              client.emit(' webclient', { topic: 'info', payload: device });
+          });
+      } catch (error) {
+          console.log('Invalid token. Client unauthorized.');
+          client.emit('unauthorized', { message: 'Unauthorized access', status: 401, reason: 'Invalid token' });
+          // client.disconnect(false)
+      }
     }
   }
 
@@ -81,7 +98,6 @@ export class SocketService implements OnGatewayConnection {
 
   sendInfoForWebClient(payload) {
     console.log('Send to WebClient'); 
-
     this.server.emit('webclient', payload);
   }
 }

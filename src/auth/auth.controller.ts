@@ -13,7 +13,7 @@ export class AuthController {
     console.log('password from client', password);
 
     // Перевірка пароля
-    if (password !== config.password) {
+    if (password !== process.env.PASSWORD) {
       throw new HttpException('Invalid password from authController', HttpStatus.UNAUTHORIZED);
     }
 

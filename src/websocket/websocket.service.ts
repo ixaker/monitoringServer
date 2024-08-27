@@ -66,22 +66,48 @@ export class SocketService implements OnGatewayConnection {
     this.server.emit(payload.id, payload);
   }
 
-  handleConnection(client: any, ...args: any[]) {
-    console.log('Client connected', client.id, client.handshake.headers.type || 'no type');
+  // from WebClients
+  @SubscribeMessage('getList')
+  handleMessageGetList(client: any, payload: any): void {
+    console.log('SubscribeMessage - getList');
 
-    if (client.handshake.headers.type === 'webclient') {
-        const clientToken = client.handshake.authorization;
+    this.dev.getList().forEach((device) => {
+      console.log('send device data')
+      client.emit('webclient', { topic: 'info', payload: device });
+  });
+  }
+
+  handleConnection(client: any, ...args: any[]) {
+    const type = client.handshake.headers.type || 'no type';
+    const clientToken = client.handshake.auth.token || 'no token';
+
+    console.log('Client connected', client.id, type, clientToken);
+    console.log(client.handshake.headers);
+    console.log(Object.keys(client.handshake));
+    console.log(client.handshake.auth);
+    console.log(client.handshake.query);
+    console.log(args);
+    console.log(Object.keys(client));
+    console.log(client.data);
+
+    if (type === 'webclient') {
+        
         try {
           const decodedToken = this.authService.verifyToken(clientToken);
-          console.log('client token is valid')
-          this.dev.getList().forEach((device) => {
+
+          if(!decodedToken){
+            throw "client token is not valid";
+          }
+
+          console.log('client token is valid');
+/*           this.dev.getList().forEach((device) => {
               console.log('send handshake data')
               client.emit(' webclient', { topic: 'info', payload: device });
-          });
+          }); */
       } catch (error) {
           console.log('Invalid token. Client unauthorized.');
           client.emit('unauthorized', { message: 'Unauthorized access', status: 401, reason: 'Invalid token' });
-          // client.disconnect(false)
+          client.disconnect(false)
       }
     }
   }

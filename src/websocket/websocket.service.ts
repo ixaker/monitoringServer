@@ -1,5 +1,5 @@
-import { OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer  } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { Devices } from './../devices/devices';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { isValidToken } from 'src/tokens/isTokenValid';
@@ -7,7 +7,7 @@ import { AuthService } from './../auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 
 
-@WebSocketGateway({ cors: { origin: '*' }})
+@WebSocketGateway({ cors: { origin: '*' } })
 
 export class SocketService implements OnGatewayConnection {
   @WebSocketServer()
@@ -18,7 +18,7 @@ export class SocketService implements OnGatewayConnection {
 
   constructor(
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
   // from Devices
   @SubscribeMessage('info')
@@ -47,9 +47,9 @@ export class SocketService implements OnGatewayConnection {
   // from Devices 
   @SubscribeMessage('result')
   handleMessageResult(client: any, data: any): void {
-      console.log('SubscribeMessage - result', data);
+    console.log('SubscribeMessage - result', data);
 
-      this.server.emit('webclient', data);
+    this.server.emit('webclient', data);
   }
 
   // from WebClients
@@ -59,7 +59,7 @@ export class SocketService implements OnGatewayConnection {
 
     this.dev.getList().forEach((device) => {
       if (device.online) {
-        this.server.emit(device.id, {topic: 'command', payload: 'Stop-Computer -Force'});
+        this.server.emit(device.id, { topic: 'command', payload: 'Stop-Computer -Force' });
       }
     });
 
@@ -71,43 +71,20 @@ export class SocketService implements OnGatewayConnection {
   handleMessageGetList(client: any, payload: any): void {
     console.log('SubscribeMessage - getList');
 
-    this.dev.getList().forEach((device) => {
-      console.log('send device data')
-      client.emit('webclient', { topic: 'info', payload: device });
-  });
-  }
-
-  handleConnection(client: any, ...args: any[]) {
-    const type = client.handshake.headers.type || 'no type';
-    const clientToken = client.handshake.auth.token || 'no token';
-
-    console.log('Client connected', client.id, type, clientToken);
-    console.log(client.handshake.headers);
-    console.log(Object.keys(client.handshake));
-    console.log(client.handshake.auth);
-    console.log(client.handshake.query);
-    console.log(args);
-    console.log(Object.keys(client));
-    console.log(client.data);
-
-    if (type === 'webclient') {
-        
-        try {
-          const decodedToken = this.authService.verifyToken(clientToken);
-
-          if(!decodedToken){
-            throw "client token is not valid";
-          }
-
-          console.log('client token is valid');
-/*           this.dev.getList().forEach((device) => {
-              console.log('send handshake data')
-              client.emit(' webclient', { topic: 'info', payload: device });
-          }); */
+    if (client.handshake.headers.type === 'webclient') {
+      const clientToken = client.handshake.authorization;
+      try {
+        const decodedToken = this.authService.verifyToken(clientToken);
+        console.log('client token is valid')
+        this.dev.getList().forEach((device) => {
+          console.log('send handshake data')
+          client.emit(' webclient', { topic: 'info', payload: device });
+        });
       } catch (error) {
-          console.log('Invalid token. Client unauthorized.');
-          client.emit('unauthorized', { message: 'Unauthorized access', status: 401, reason: 'Invalid token' });
-          client.disconnect(false)
+        console.log('Invalid token. Client unauthorized.');
+        client.emit('unauthorized', { message: 'Unauthorized access', status: 401, reason: 'Invalid token' });
+        // client.disconnect(false)
+
       }
     }
   }
@@ -123,8 +100,14 @@ export class SocketService implements OnGatewayConnection {
   }
 
   sendInfoForWebClient(payload) {
-    console.log('Send to WebClient'); 
+    console.log('Send to WebClient');
     this.server.emit('webclient', payload);
+  }
+
+  broadcastCommandToAllClients(command: { topic: string; payload: string }) {
+    this.server.emit('update', command);
+
+    console.log(`Broadcast command: ${command.payload} to all clients`);
   }
 }
 

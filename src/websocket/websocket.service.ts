@@ -99,6 +99,11 @@ export class SocketService implements OnGatewayConnection {
     console.log('Client disconnected', client.id, devID);
   }
 
+  handleConnection(client: Socket, ...args: any[]): void {
+    console.log('Client connected', client.id);
+    // Ви можете додати інші дії, які потрібно виконати при підключенні клієнта
+  }
+
   sendInfoForWebClient(payload) {
     console.log('Send to WebClient');
     this.server.emit('webclient', payload);

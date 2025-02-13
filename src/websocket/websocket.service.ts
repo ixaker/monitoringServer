@@ -5,6 +5,7 @@ import * as TelegramBot from 'node-telegram-bot-api';
 import { isValidToken } from 'src/tokens/isTokenValid';
 import { AuthService } from './../auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { performance } from 'perf_hooks';
 
 
 @WebSocketGateway({ cors: { origin: '*' } })
@@ -20,12 +21,32 @@ export class SocketService implements OnGatewayConnection {
     private readonly authService: AuthService,
   ) { }
 
+
+  @SubscribeMessage('delete_device')
+  handleDeleteDevice(client: any, payload: any): void {
+    console.log('SubscribeMessage - delete_device', payload);
+
+    const deviceId = payload.deviceId;
+
+    this.dev.removeDevice(deviceId);
+
+    console.log(`Device ${deviceId} deleted and all clients notified.`);
+  }
+
   // from Devices
   @SubscribeMessage('info')
   handleMessageInfo(client: any, payload: any): void {
     console.log('SubscribeMessage - info', payload.name);
     client.devID = payload.id;
     this.dev.updateInfo(payload);
+  }
+
+
+  @SubscribeMessage('update')
+  handleUpdate(client: any, payload: any): void {
+    console.log('Handling update event:', payload);
+    const command = { topic: 'command', payload: payload.command };
+    this.broadcastCommandToAllClients(command);
   }
 
   // from WebClients
@@ -76,10 +97,26 @@ export class SocketService implements OnGatewayConnection {
       try {
         const decodedToken = this.authService.verifyToken(clientToken);
         console.log('client token is valid')
-        this.dev.getList().forEach((device) => {
-          console.log('send handshake data')
-          client.emit(' webclient', { topic: 'info', payload: device });
+
+        // Вимірюємо час початку відправки даних
+        const startTime = performance.now();
+
+        // Отримуємо список пристроїв
+        const devices = this.dev.getList();
+
+        devices.forEach((device) => {
+          const sendStartTime = performance.now();
+          console.log(`Sending data for device ${device.id}`);
+
+          client.emit('webclient', { topic: 'info', payload: device });
+          const sendEndTime = performance.now();
+          console.log(`Data for device ${device.id} sent in ${sendEndTime - sendStartTime}ms`);
         });
+
+        // Вимірюємо загальний час для відправки всіх даних
+        const endTime = performance.now();
+        console.log(`Total time to process getList request: ${endTime - startTime}ms`);
+
       } catch (error) {
         console.log('Invalid token. Client unauthorized.');
         client.emit('unauthorized', { message: 'Unauthorized access', status: 401, reason: 'Invalid token' });

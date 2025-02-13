@@ -41,7 +41,7 @@ export class Devices {
     private list: Device[] = [];
     private filename: string = 'devices.json'; // Путь к файлу для сохранения данных
     private callback: (device: Object) => void; // Объявляем тип callback функции
-    
+
     constructor(callback: (device: Device) => void) {
         this.callback = callback;
         this.init();
@@ -67,29 +67,29 @@ export class Devices {
 
         setInterval(() => {
             this.checkIsOffline();
-          }, 15000); // 10000 миллисекунд = 10 секунд
+        }, 15000); // 10000 миллисекунд = 10 секунд
     }
-    
+
     private checkIsOffline() {
         console.log('Эта функция вызывается каждые 15 секунд');
-        
+
         try {
-            const currTime : Date = new Date(); 
-        
+            const currTime: Date = new Date();
+
             this.list.forEach((device) => {
                 try {
-                    const lastTime = device.timeLastInfo || new Date(0);                  
+                    const lastTime = device.timeLastInfo || new Date(0);
                     const diffTime = (currTime.getTime() - lastTime.getTime()) / 1000;
-                    
+
                     if (diffTime > 25) {
                         this.setProperty(device, 'online', false);
                     }
 
-                    console.log(device.name, device.online ,'diffTime', diffTime, lastTime);
+                    console.log(device.name, device.online, 'diffTime', diffTime, lastTime);
                 } catch (error) {
                     this.setProperty(device, 'online', false);
                 }
-                
+
             });
         } catch (error) {
             console.error('checkIsOffline', error);
@@ -103,20 +103,20 @@ export class Devices {
     async updateInfo(payload: Device): Promise<void> {
         payload.timeLastInfo = new Date();
         payload.online = true;
-        
+
         try {
             const index = this.list.findIndex((item) => item.id === payload.id);
             if (index >= 0) {
                 const device = this.list[index];
 
-                payload.CPU.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...device.CPU.history||[]].slice(-15);
+                payload.CPU.history = [...[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ...device.CPU.history || []].slice(-15);
                 payload.CPU.history.push(payload.CPU.load);
 
-                payload.RAM.history = [ ...[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ...device.RAM.history||[]].slice(-15);
+                payload.RAM.history = [...[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ...device.RAM.history || []].slice(-15);
                 payload.RAM.history.push(payload.RAM.procent);
 
                 this.list[index] = payload;
-                this.callback({topic: 'info', payload: payload});
+                this.callback({ topic: 'info', payload: payload });
             } else {
                 payload.CPU.history = [payload.CPU.load];
                 payload.RAM.history = [payload.RAM.procent];
@@ -138,14 +138,14 @@ export class Devices {
         }
     }
 
-    private setProperty(device:Device, property:string, newValue:any){
-        if(device[property] !== newValue){
+    private setProperty(device: Device, property: string, newValue: any) {
+        if (device[property] !== newValue) {
             device[property] = newValue;
-            this.callback({topic: 'info', payload: device});
+            this.callback({ topic: 'info', payload: device });
         }
     }
 
-    setOffline(id:string){
+    setOffline(id: string) {
         try {
             const index = this.list.findIndex((item) => item.id === id);
 
@@ -153,11 +153,29 @@ export class Devices {
                 const device = this.list[index];
 
                 device.online = false;
-                this.callback({topic: 'info', payload: device});
+                this.callback({ topic: 'info', payload: device });
             }
 
         } catch (error) {
             console.error('ERROR - setOffline', error)
+        }
+    }
+
+    async removeDevice(id: string): Promise<void> {
+        try {
+            const index = this.list.findIndex((item) => item.id === id);
+
+            if (index >= 0) {
+                const device = this.list.splice(index, 1)[0]; // Видалення пристрою з масиву
+
+                await this.saveToFile(); // Збереження змін у файл
+                this.callback({ topic: 'info', payload: device }); // Оповіщення через колбек
+                console.log(`Device ${id} removed.`);
+            } else {
+                console.log(`Device with id ${id} not found.`);
+            }
+        } catch (error) {
+            console.error('ERROR - removeDevice', error);
         }
     }
 }

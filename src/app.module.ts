@@ -4,14 +4,10 @@ import { AppService } from './app.service';
 import { SocketService } from './websocket/websocket.service';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './auth.middleware';
-import { TokenService } from './tokens/tokens';
-import { AuthService } from './auth/auth.service';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from './config/config.module';
 
 @Module({
-  imports: [
-    AuthModule
-  ],
+  imports: [AuthModule, ConfigModule],
   controllers: [AppController],
   providers: [AppService, SocketService, AuthMiddleware],
 })

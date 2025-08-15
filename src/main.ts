@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 // import * as fs from 'fs';
 import * as dotenv from 'dotenv';
+dotenv.config();
 
 interface MyCorsOptions {
   origin: string | string[];
@@ -29,14 +30,13 @@ async function bootstrap() {
     credentials: true,
   };
 
-  dotenv.config();
   const app = await NestFactory.create(AppModule, {
     // httpsOptions,
   });
 
   app.enableCors(corsOptions);
-  // const port = process.env.DOTENV_LISTEN_PORT;
-  // const hostIp = process.env.DOTENV_HOST_IP;
-  await app.listen(3000, '127.1.5.229');
+  const port = process.env.DOTENV_LISTEN_PORT;
+  const hostIp = process.env.DOTENV_HOST_IP;
+  await app.listen(port, hostIp);
 }
 bootstrap();

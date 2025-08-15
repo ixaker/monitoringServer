@@ -3,7 +3,7 @@ import { SocketService } from './websocket/websocket.service';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly SocketService: SocketService) { }
+  constructor(private readonly SocketService: SocketService) {}
   getHello(): string {
     return 'Hello World!';
   }

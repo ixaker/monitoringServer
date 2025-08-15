@@ -7,7 +7,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { ConfigService } from 'src/config/config.service.js';
+import { ConfigService } from '../config/config.service.js';
 
 @Controller('login')
 export class AuthController {

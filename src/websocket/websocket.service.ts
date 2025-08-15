@@ -1,26 +1,30 @@
-import { OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
+import {
+  OnGatewayConnection,
+  WebSocketGateway,
+  SubscribeMessage,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Devices } from './../devices/devices';
 import * as TelegramBot from 'node-telegram-bot-api';
-import { isValidToken } from 'src/tokens/isTokenValid';
 import { AuthService } from './../auth/auth.service';
-import { JwtService } from '@nestjs/jwt';
 import { performance } from 'perf_hooks';
-
+import { ConfigService } from 'src/config/config.service';
 
 @WebSocketGateway({ cors: { origin: '*' } })
-
 export class SocketService implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
   dev = new Devices(this.sendInfoForWebClient.bind(this));
-  bot = new TelegramBot('5732114057:AAHK-S0mlws8G4-d9AOwJ0rlqX6ikeI_nSY', { polling: true });
+  bot = new TelegramBot('5732114057:AAHK-S0mlws8G4-d9AOwJ0rlqX6ikeI_nSY', {
+    polling: true,
+  });
   chatId = '672754822';
 
   constructor(
     private readonly authService: AuthService,
-  ) { }
-
+    private readonly configService: ConfigService,
+  ) {}
 
   @SubscribeMessage('delete_device')
   handleDeleteDevice(client: any, payload: any): void {
@@ -41,7 +45,6 @@ export class SocketService implements OnGatewayConnection {
     this.dev.updateInfo(payload);
   }
 
-
   @SubscribeMessage('update')
   handleUpdate(client: any, payload: any): void {
     console.log('Handling update event:', payload);
@@ -57,7 +60,7 @@ export class SocketService implements OnGatewayConnection {
     this.server.emit(payload.id, payload);
   }
 
-  // from Devices 
+  // from Devices
   @SubscribeMessage('telegram')
   handleMessageTelegram(client: any, data: any): void {
     console.log('SubscribeMessage - telegram', data);
@@ -65,7 +68,7 @@ export class SocketService implements OnGatewayConnection {
     this.bot.sendMessage(this.chatId, data);
   }
 
-  // from Devices 
+  // from Devices
   @SubscribeMessage('result')
   handleMessageResult(client: any, data: any): void {
     console.log('SubscribeMessage - result', data);
@@ -80,7 +83,10 @@ export class SocketService implements OnGatewayConnection {
 
     this.dev.getList().forEach((device) => {
       if (device.online) {
-        this.server.emit(device.id, { topic: 'command', payload: 'Stop-Computer -Force' });
+        this.server.emit(device.id, {
+          topic: 'command',
+          payload: 'Stop-Computer -Force',
+        });
       }
     });
 
@@ -96,7 +102,7 @@ export class SocketService implements OnGatewayConnection {
       const clientToken = client.handshake.authorization;
       try {
         const decodedToken = this.authService.verifyToken(clientToken);
-        console.log('client token is valid')
+        console.log('client token is valid');
 
         // Вимірюємо час початку відправки даних
         const startTime = performance.now();
@@ -110,19 +116,54 @@ export class SocketService implements OnGatewayConnection {
 
           client.emit('webclient', { topic: 'info', payload: device });
           const sendEndTime = performance.now();
-          console.log(`Data for device ${device.id} sent in ${sendEndTime - sendStartTime}ms`);
+          console.log(
+            `Data for device ${device.id} sent in ${sendEndTime - sendStartTime}ms`,
+          );
         });
 
         // Вимірюємо загальний час для відправки всіх даних
         const endTime = performance.now();
-        console.log(`Total time to process getList request: ${endTime - startTime}ms`);
-
+        console.log(
+          `Total time to process getList request: ${endTime - startTime}ms`,
+        );
       } catch (error) {
         console.log('Invalid token. Client unauthorized.');
-        client.emit('unauthorized', { message: 'Unauthorized access', status: 401, reason: 'Invalid token' });
+        client.emit('unauthorized', {
+          message: 'Unauthorized access',
+          status: 401,
+          reason: 'Invalid token',
+        });
         // client.disconnect(false)
-
       }
+    }
+  }
+
+  // from WebClients
+  @SubscribeMessage('change_password')
+  async handleChangePassword(client: Socket, payload: { newPassword: string }) {
+    console.log('SubscribeMessage - change_password', payload.newPassword);
+    try {
+      // Проверка авторизации (если нужно)
+      const token =
+        client.handshake.headers.authorization || client.handshake.auth.token;
+      if (!token) throw new Error('Требуется авторизация');
+
+      // Валидация пароля
+      if (payload.newPassword.length < 8) {
+        throw new Error('Пароль должен содержать минимум 8 символов');
+      }
+
+      // Обновляем пароль в конфиге
+      const result = await this.configService.updatePassword(
+        payload.newPassword,
+      );
+
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
     }
   }
 
@@ -152,4 +193,3 @@ export class SocketService implements OnGatewayConnection {
     console.log(`Broadcast command: ${command.payload} to all clients`);
   }
 }
-

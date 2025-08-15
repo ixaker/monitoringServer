@@ -1,12 +1,11 @@
 import { Controller, Get, Post, Body, Headers, Res } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Response } from 'express';
-import { SocketService } from './websocket/websocket.service';
-
+// import { SocketService } from './websocket/websocket.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   getHello(): string {
@@ -26,4 +25,3 @@ export class AppController {
     res.status(200).send('OK');
   }
 }
-

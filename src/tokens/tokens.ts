@@ -4,13 +4,11 @@ import * as path from 'path';
 
 @Injectable()
 export class TokenService {
-//   private filePath = path.join(__dirname, './../../tokens.json');
-    private filePath: string = 'tokens.json';
-    
-  
+  //   private filePath = path.join(__dirname, './../../tokens.json');
+  private filePath: string = 'tokens.json';
 
   readTokensFromFile(): string[] {
-    console.log(this.filePath)
+    console.log(this.filePath);
     try {
       const tokensData = fs.readFileSync(this.filePath, 'utf-8');
       return JSON.parse(tokensData);
@@ -22,7 +20,7 @@ export class TokenService {
 
   writeTokensToFile(token: string): void {
     try {
-      let tokens: string[] = this.readTokensFromFile(); // Отримуємо поточні токени з файлу
+      const tokens: string[] = this.readTokensFromFile(); // Отримуємо поточні токени з файлу
       tokens.push(token); // Додаємо новий токен до масиву
       fs.writeFileSync(this.filePath, JSON.stringify(tokens, null, 2));
       console.log('Токен був успішно записаний у файл.');

@@ -1,9 +1,8 @@
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 // import * as fs from 'fs';
 import * as dotenv from 'dotenv';
-dotenv.config();
 
 async function bootstrap() {
   // const port = process.D

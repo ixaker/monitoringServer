@@ -1,7 +1,7 @@
 // src/config/config.init.ts
 import { Injectable, Logger } from '@nestjs/common';
-import * as path from 'path';
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import { HashService } from '../auth/hash.service'; // Добавьте импорт
 
 @Injectable()
@@ -16,7 +16,10 @@ export class ConfigInitializer {
       await this.ensureConfigExists();
       this.logger.log('Configuration initialized successfully');
     } catch (error) {
-      this.logger.error('Failed to initialize config:', error.message);
+      this.logger.error(
+        'Failed to initialize config:',
+        error instanceof Error ? error.message : String(error),
+      );
       throw error;
     }
   }

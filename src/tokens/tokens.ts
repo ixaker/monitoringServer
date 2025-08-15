@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class TokenService {
@@ -12,8 +11,12 @@ export class TokenService {
     try {
       const tokensData = fs.readFileSync(this.filePath, 'utf-8');
       return JSON.parse(tokensData);
-    } catch (error) {
-      console.error('Помилка при читанні файлу токенів:', error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Помилка при читанні файлу токенів:', error.message);
+      } else {
+        console.error('Невідома помилка при читанні файлу токенів');
+      }
       return [];
     }
   }
@@ -24,8 +27,12 @@ export class TokenService {
       tokens.push(token); // Додаємо новий токен до масиву
       fs.writeFileSync(this.filePath, JSON.stringify(tokens, null, 2));
       console.log('Токен був успішно записаний у файл.');
-    } catch (error) {
-      console.error('Помилка при записі токена у файл:', error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Помилка при записі токена у файл:', error.message);
+      } else {
+        console.error('Невідома помилка при записі токена у файл');
+      }
     }
   }
 }

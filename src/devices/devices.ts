@@ -1,4 +1,3 @@
-import { log } from 'console';
 import { promises as fs } from 'fs';
 
 interface CPUInfo {
@@ -25,6 +24,7 @@ interface DiskInfo {
 }
 
 interface Device {
+  [key: string]: unknown;
   role: string;
   name: string;
   uptime: string;
@@ -37,12 +37,17 @@ interface Device {
   timeLastInfo: Date;
 }
 
+interface DeviceMessage {
+  topic: string;
+  payload: Device;
+}
+
 export class Devices {
   private list: Device[] = [];
   private filename: string = 'devices.json'; // Путь к файлу для сохранения данных
-  private callback: (device: Object) => void; // Объявляем тип callback функции
+  private callback: (message: DeviceMessage) => void; // Объявляем тип callback функции
 
-  constructor(callback: (device: Device) => void) {
+  constructor(callback: (message: DeviceMessage) => void) {
     this.callback = callback;
     this.init();
   }
@@ -55,14 +60,17 @@ export class Devices {
       this.list.forEach((device) => {
         device.timeLastInfo = new Date(device.timeLastInfo);
       });
-    } catch (err) {
-      if (err.code === 'ENOENT') {
+    } catch (err: unknown) {
+      if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
         console.log(
           'Файл devices.json не найден. Будет создан новый при первом сохранении.',
         );
         this.list = []; // Инициализация пустым массивом
       } else {
-        console.error('Ошибка при чтении файла:', err);
+        console.error(
+          'Ошибка при чтении файла:',
+          err instanceof Error ? err.message : String(err),
+        );
       }
     }
 

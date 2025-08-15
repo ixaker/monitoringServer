@@ -1,15 +1,15 @@
 import {
   OnGatewayConnection,
-  WebSocketGateway,
   SubscribeMessage,
+  WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { Devices } from './../devices/devices';
-import * as TelegramBot from 'node-telegram-bot-api';
-import { AuthService } from './../auth/auth.service';
+import TelegramBot from 'node-telegram-bot-api';
 import { performance } from 'perf_hooks';
-import { ConfigService } from 'src/config/config.service';
+import { Server, Socket } from 'socket.io';
+import { ConfigService } from 'src/config/config.service.js';
+import { AuthService } from './../auth/auth.service.js';
+import { Devices } from './../devices/devices.js';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class SocketService implements OnGatewayConnection {
@@ -159,10 +159,12 @@ export class SocketService implements OnGatewayConnection {
       );
 
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Неизвестная ошибка';
       return {
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
@@ -182,7 +184,7 @@ export class SocketService implements OnGatewayConnection {
     // Ви можете додати інші дії, які потрібно виконати при підключенні клієнта
   }
 
-  sendInfoForWebClient(payload) {
+  sendInfoForWebClient(payload: any) {
     console.log('Send to WebClient');
     this.server.emit('webclient', payload);
   }

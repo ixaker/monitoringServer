@@ -3,8 +3,8 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 // import * as crypto from 'crypto';
-import { PasswordValidator } from '../auth/password.validator';
 import { HashService } from '../auth/hash.service';
+import { PasswordValidator } from '../auth/password.validator';
 import { ConfigInitializer } from './config.init';
 
 interface AppConfig {
@@ -73,17 +73,6 @@ export class ConfigService implements OnModuleInit {
     await fs.writeFile(this.configPath, JSON.stringify(fullConfig, null, 2));
     console.log('Config saved:', fullConfig); // Добавьте для отладки
   }
-
-  // private hashPassword(password: string): string {
-  //   // Явное приведение и нормализация
-  //   const normalizedPassword = String(password).trim().normalize('NFKC'); // Учитывает Unicode-вариации
-
-  //   return crypto
-  //     .createHash('sha256')
-  //     .update(normalizedPassword, 'utf8')
-  //     .digest('hex')
-  //     .toLowerCase(); // Единый регистр
-  // }
 
   async validatePassword(password: string): Promise<boolean> {
     // Принудительно загружаем актуальный конфиг

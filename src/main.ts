@@ -35,8 +35,19 @@ async function bootstrap() {
   });
 
   app.enableCors(corsOptions);
-  const port = process.env.DOTENV_LISTEN_PORT;
-  const hostIp = process.env.DOTENV_HOST_IP;
+  // Получаем и валидируем порт (со значением по умолчанию)
+  const port = process.env.DOTENV_LISTEN_PORT
+    ? parseInt(process.env.DOTENV_LISTEN_PORT, 10)
+    : 3000;
+
+  if (isNaN(port)) {
+    throw new Error('Invalid DOTENV_LISTEN_PORT - must be a number');
+  }
+
+  // Получаем хост (со значением по умолчанию)
+  const hostIp = process.env.DOTENV_HOST_IP || '127.1.5.229';
+
   await app.listen(port, hostIp);
+  console.log(`Server running on http://${hostIp}:${port}`);
 }
 bootstrap();

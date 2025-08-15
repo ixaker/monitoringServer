@@ -1,6 +1,6 @@
 // src/auth/hash.module.ts
 import { Module } from '@nestjs/common';
-import { HashService } from './hash.service';
+import { HashService } from './hash.service.js';
 
 @Module({
   providers: [HashService],

@@ -6,8 +6,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { ConfigService } from 'src/config/config.service';
+import { AuthService } from './auth.service.js';
+import { ConfigService } from 'src/config/config.service.js';
 
 @Controller('login')
 export class AuthController {

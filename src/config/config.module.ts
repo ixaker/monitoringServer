@@ -1,8 +1,8 @@
 // src/config/config.module.ts
 import { Module } from '@nestjs/common';
-import { ConfigService } from './config.service';
-import { ConfigInitializer } from './config.init';
-import { HashModule } from '../auth/hash.module';
+import { HashModule } from '../auth/hash.module.js';
+import { ConfigInitializer } from './config.init.js';
+import { ConfigService } from './config.service.js';
 
 @Module({
   imports: [HashModule],

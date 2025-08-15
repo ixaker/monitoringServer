@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SocketService } from './websocket/websocket.service';
+import { SocketService } from './websocket/websocket.service.js';
 
 @Injectable()
 export class AppService {

@@ -3,9 +3,9 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 // import * as crypto from 'crypto';
-import { HashService } from '../auth/hash.service';
-import { PasswordValidator } from '../auth/password.validator';
-import { ConfigInitializer } from './config.init';
+import { HashService } from '../auth/hash.service.js';
+import { PasswordValidator } from '../auth/password.validator.js';
+import { ConfigInitializer } from './config.init.js';
 
 interface AppConfig {
   passwordHash: string;

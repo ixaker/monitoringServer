@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Headers, Res } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Body, Controller, Get, Headers, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { AppService } from './app.service.js';
 // import { SocketService } from './websocket/websocket.service';
 
 @Controller()

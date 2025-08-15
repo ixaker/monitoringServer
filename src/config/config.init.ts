@@ -2,7 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { HashService } from '../auth/hash.service'; // Добавьте импорт
+import { HashService } from '../auth/hash.service.js'; // Добавьте импорт
 
 @Injectable()
 export class ConfigInitializer {

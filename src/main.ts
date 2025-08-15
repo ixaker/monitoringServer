@@ -1,8 +1,15 @@
-import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 // import * as fs from 'fs';
 import * as dotenv from 'dotenv';
+
+interface MyCorsOptions {
+  origin: string | string[];
+  methods?: string[];
+  allowedHeaders?: string[];
+  credentials?: boolean;
+  maxAge?: number;
+}
 
 async function bootstrap() {
   // const port = process.D
@@ -15,7 +22,7 @@ async function bootstrap() {
   //   ),
   // };
 
-  const corsOptions: CorsOptions = {
+  const corsOptions: MyCorsOptions = {
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'qwerty'],

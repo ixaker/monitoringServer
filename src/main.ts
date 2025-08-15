@@ -35,7 +35,8 @@ async function bootstrap() {
   });
 
   app.enableCors(corsOptions);
-
-  await app.listen(3000, '127.1.5.229');
+  const port = process.env.DOTENV_LISTEN_PORT;
+  const hostIp = process.env.DOTENV_HOST_IP;
+  await app.listen(`${port}`, `${hostIp}`);
 }
 bootstrap();

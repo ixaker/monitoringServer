@@ -7,7 +7,7 @@ import {
 import TelegramBot from 'node-telegram-bot-api';
 import { performance } from 'perf_hooks';
 import { Server, Socket } from 'socket.io';
-import { ConfigService } from 'src/config/config.service.js';
+import { ConfigService } from '../config/config.service.js';
 import { AuthService } from './../auth/auth.service.js';
 import { Devices } from './../devices/devices.js';
 
